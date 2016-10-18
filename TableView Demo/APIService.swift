@@ -11,34 +11,40 @@ import Alamofire
 
 class APIService {
     
-    // MARK: URL String
+    // MARK: Singleton
+    static let sharedInstance = APIService()
     
-    let urlString = "https://alpha-api.app.net/stream/0/posts/stream/global"
+    // MARK: URL String
+    let baseURL = "https://alpha-api.app.net/"
     
     // MARK: Method to get posts from server
-    
     func getPosts(completion:(allPosts: [Post]?, error: NSError?) -> Void) {
+        let globalPostURL = baseURL + "stream/0/posts/stream/global"
         
-        Alamofire.request(.GET, urlString).response { (request, response, data, error) in
+        Alamofire.request(.GET, globalPostURL).response { (request, response, data, error) in
+            guard error == nil else {
+                print("Error while fetching posts: \(error)")
+                completion(allPosts: nil, error: error)
+                return
+            }
             do {
-                if let jsonData = try NSJSONSerialization.JSONObjectWithData(data!, options: .AllowFragments) as? [String : AnyObject] {
-                    var posts = [Post]()
-                    if let dataDict = jsonData["data"] as? [AnyObject] {
-                        for i in 0..<(dataDict.count ?? 0) {
-                            if let individualPost = dataDict[i] as? [String : AnyObject] {
-                                posts.append(Post())
-                                posts[i].created_at = (individualPost["created_at"] as? String)!
-                                posts[i].user = individualPost["user"] as? [String : AnyObject]
-                                posts[i].text = individualPost["text"] as? String
-                                posts[i].username = (posts[i].user!["username"] as? String)!
-                                posts[i].avatar_image = (posts[i].user!["avatar_image"]!["url"] as? String)!
+                print("Request: \(request!)")
+                print("Response: \(response!)")
+                if let fetchedData = data {
+                    if let jsonData = try NSJSONSerialization.JSONObjectWithData(fetchedData, options: .AllowFragments) as? [String : AnyObject] {
+                        var posts = [Post]()
+                        if let dataDict = jsonData["data"] as? [AnyObject] {
+                            for i in 0..<(dataDict.count ?? 0) {
+                                if let individualPost = dataDict[i] as? [String : AnyObject] {
+                                    posts.append(Post(post: individualPost))
+                                }
                             }
+                            completion(allPosts: posts, error: nil)
                         }
-                        completion(allPosts: posts, error: nil)
                     }
                 }
             } catch {
-                completion(allPosts: nil, error: nil)
+                completion(allPosts: nil, error: error as NSError)
                 print("Error encountered.")
             }
         }
