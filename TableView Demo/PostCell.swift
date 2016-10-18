@@ -12,7 +12,7 @@ import DateTools
 
 class PostCell: UITableViewCell {
     
-    var indexPath: NSIndexPath?
+    private var indexPath: NSIndexPath?
     
     // MARK: Outlets
     
@@ -25,26 +25,43 @@ class PostCell: UITableViewCell {
     
     func configureCell(post: Post, indexPath: NSIndexPath) {
         
+        fetchAvatarImageInBackground(post, indexPath: indexPath)
+        self.usernameLabel.text = post.username
+        
+        // Format post time
+        let postDate = NSDate(string: post.created_at, formatString: "yyyy-MM-dd HH:mm:ss")
+        self.postTimeLabel.text = postDate.timeAgoSinceNow()
+        
+        self.postTextLabel.text = post.text
+        self.indexPath = indexPath
+    }
+    
+    // MARK: Fetch Avatar Image
+    
+    private func fetchAvatarImageInBackground(post: Post, indexPath: NSIndexPath) {
+        
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), {
-            if let url = NSURL(string: post.avatar_image) {
-                if let data = NSData(contentsOfURL: url) {
-                    dispatch_async(dispatch_get_main_queue(), {
-                        if (self.indexPath == indexPath) {
-                            self.userAvatarImageView.image = UIImage(data: data)
-                        }
-                    })
+            if let avatarImageURL = post.avatar_image {
+                if let url = NSURL(string: avatarImageURL) {
+                    if let data = NSData(contentsOfURL: url) {
+                        dispatch_async(dispatch_get_main_queue(), {
+                            if (self.indexPath == indexPath) {
+                                self.userAvatarImageView.image = UIImage(data: data)
+                            }
+                        })
+                    }
                 }
             }
         })
-        
-        self.usernameLabel.text = post.username
-        self.postTimeLabel.text = post.created_at
-        self.postTextLabel.text = post.text
-        self.indexPath = indexPath
-        
-        var createdAtString = post.created_at.stringByReplacingOccurrencesOfString("T", withString: " ")
-        createdAtString = createdAtString.stringByReplacingOccurrencesOfString("Z", withString: "")
-        let created_at: NSDate = NSDate(string: createdAtString, formatString: "yyyy-MM-dd HH:mm:ss")
-        self.postTimeLabel.text = created_at.timeAgoSinceNow()
     }
+    
+    // MARK: Return Post Cell Identifier
+    
+    func postCellIdentifier() -> String {
+        return cellIdentifier
+    }
+    
+    // MARK: Constant
+    
+    private let cellIdentifier = "PostCellIdentifier"
 }
