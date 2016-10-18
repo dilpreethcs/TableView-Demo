@@ -1,0 +1,18 @@
+PODS:
+  - Alamofire (3.4.1)
+  - DateTools (1.7.0)
+  - SVProgressHUD (2.0.3)
+
+DEPENDENCIES:
+  - Alamofire
+  - DateTools
+  - SVProgressHUD
+
+SPEC CHECKSUMS:
+  Alamofire: 01a82e2f6c0f860ade35534c8dd88be61bdef40c
+  DateTools: 53288ee8b905fdc75897a1e6b5cc0144b14cba60
+  SVProgressHUD: b0830714205bea1317ea1a2ebc71e5633af334d4
+
+PODFILE CHECKSUM: 5df79379ce8e7b336a0f15032d45088177b7e0de
+
+COCOAPODS: 1.0.1
