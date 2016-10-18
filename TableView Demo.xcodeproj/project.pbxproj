@@ -67,10 +67,10 @@
 		7D416DE31DB0D00900B6FBE0 /* TableView Demo */ = {
 			isa = PBXGroup;
 			children = (
-				7D416DF61DB0D0F000B6FBE0 /* DemoTableViewController.swift */,
-				7D1B819C1DB4CA9800D95838 /* PostCell.swift */,
 				7DCA5D981DB0F9B00012EFC7 /* Post.swift */,
 				7DCA5D961DB0F4960012EFC7 /* APIService.swift */,
+				7D1B819C1DB4CA9800D95838 /* PostCell.swift */,
+				7D416DF61DB0D0F000B6FBE0 /* DemoTableViewController.swift */,
 				7D416DE81DB0D00900B6FBE0 /* Main.storyboard */,
 				7DECB14A1DB4FDFD008A6966 /* Supporting Files */,
 			);

@@ -15,49 +15,57 @@ class DemoTableViewController: UITableViewController {
         didSet {
             posts.sortInPlace({ $0.created_at > $1.created_at })
             
-            self.tableView.reloadData()
-        }
-    }
-    
-    func refresh(sender:AnyObject)
-    {
-        getPosts()
-        self.refreshControl?.endRefreshing()
-    }
-    
-    private func getPosts() {
-        APIService().getPosts { (allPosts, error) in
-            if allPosts != nil {
-                self.posts = allPosts!
+            if self.isViewLoaded() {
+                self.tableView.reloadData()
             }
-            SVProgressHUD.dismiss()
         }
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.title = "app.net posts"
-        self.tableView.dataSource = self
-        self.refreshControl = UIRefreshControl.init()
+        self.title = "Posts"
+        
+        self.refreshControl = UIRefreshControl()
         self.refreshControl?.addTarget(self, action: #selector(DemoTableViewController.refresh), forControlEvents: UIControlEvents.ValueChanged)
+        
         SVProgressHUD.showWithStatus("Loading Posts...")
         getPosts()
         self.tableView.rowHeight = UITableViewAutomaticDimension
         self.tableView.estimatedRowHeight = 300
     }
 
-    // MARK: - Table view data source
+    func refresh(sender:AnyObject) {
+        APIService.sharedInstance.getPosts { (allPosts, error) in
+            if allPosts != nil {
+                self.posts = allPosts!
+            }
+            self.refreshControl?.endRefreshing()
+        }
+    }
+    
+    private func getPosts() {
+        APIService.sharedInstance.getPosts { (allPosts, error) in
+            if allPosts != nil {
+                self.posts = allPosts!
+            }
+            SVProgressHUD.dismiss()
+        }
+    }
+}
 
+extension DemoTableViewController {
+    
+    // MARK: - Table view data source
+    
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return posts.count
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("PostCellIdentifier", forIndexPath: indexPath) as! PostCell
-        if posts.count != 0 {
-            let post: Post = self.posts[indexPath.row]
-            cell.configureCell(post, indexPath: indexPath)
-        }
+        let cell = tableView.dequeueReusableCellWithIdentifier(PostCell().postCellIdentifier(), forIndexPath: indexPath) as! PostCell
+        let post = posts[indexPath.row]
+        cell.configureCell(post, indexPath: indexPath)
+        
         return cell
     }
     
