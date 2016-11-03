@@ -17,7 +17,7 @@ class PostCell: UITableViewCell {
     // MARK: Outlets
     
     @IBOutlet weak var userAvatarImageView: UIImageView!
-    @IBOutlet weak var usernameLabel: UILabel!
+    @IBOutlet weak var userNameLabel: UILabel!
     @IBOutlet weak var postTimeLabel: UILabel!
     @IBOutlet weak var postTextLabel: UILabel!
     
@@ -26,12 +26,8 @@ class PostCell: UITableViewCell {
     func configureCell(post: Post, indexPath: NSIndexPath) {
         
         fetchAvatarImageInBackground(post, indexPath: indexPath)
-        self.usernameLabel.text = post.username
-        
-        // Format post time
-        let postDate = NSDate(string: post.created_at, formatString: "yyyy-MM-dd HH:mm:ss")
-        self.postTimeLabel.text = postDate.timeAgoSinceNow()
-        
+        userNameLabel.text = post.userName
+        self.postTimeLabel.text = post.createdAtDate.timeAgoSinceNow()
         self.postTextLabel.text = post.text
         self.indexPath = indexPath
     }
@@ -41,17 +37,12 @@ class PostCell: UITableViewCell {
     private func fetchAvatarImageInBackground(post: Post, indexPath: NSIndexPath) {
         
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), {
-            if let avatarImageURL = post.avatar_image {
-                if let url = NSURL(string: avatarImageURL) {
-                    if let data = NSData(contentsOfURL: url) {
-                        dispatch_async(dispatch_get_main_queue(), {
-                            if (self.indexPath == indexPath) {
-                                self.userAvatarImageView.image = UIImage(data: data)
-                            }
-                        })
-                    }
+            guard let data = NSData(contentsOfURL: post.avatarImageURL) else { return }
+            dispatch_async(dispatch_get_main_queue(), {
+                if self.indexPath == indexPath {
+                    self.userAvatarImageView.image = UIImage(data: data)
                 }
-            }
+            })
         })
     }
     

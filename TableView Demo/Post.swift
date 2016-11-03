@@ -9,23 +9,28 @@
 import Foundation
 
 struct Post {
-    var created_at: String!
-    var text: String?
-    var user: [String : AnyObject]?
-    var username: String!
-    var avatar_image: String?
+    let createdAtDate: NSDate
+    let text: String
+    let userName: String
+    let avatarImageURL: NSURL
     
-    init(post: [String : AnyObject]) {
-        self.created_at = post["created_at"] as? String
+    init?(post: [String : AnyObject]) {
+        guard let createdAtString = post["created_at"] as? String,
+            let createdAtDate = NSDate(string: createdAtString, formatString: "yyyy-MM-dd'T'HH:mm:ss'Z'"),
+            let text = post["text"] as? String,
+            let userInfo = post["user"] as? [String: AnyObject],
+            let userName = userInfo["username"] as? String,
+            let avatarImageURLInfo = userInfo["avatar_image"] as? [String: AnyObject],
+            let avatarImageURLString = avatarImageURLInfo["url"] as? String,
+            let avatarImageURL = NSURL(string: avatarImageURLString)
+            else {
+                print("Parsing error encountered")
+                return nil // parsing error
+        }
         
-        // Format time string
-        self.created_at = self.created_at?.stringByReplacingOccurrencesOfString("T", withString: " ")
-        self.created_at = self.created_at?.stringByReplacingOccurrencesOfString("Z", withString: "")
-
-        self.text = post["text"] as? String
-        self.user = post["user"] as? [String : AnyObject]
-        self.username = (post["user"])?["username"] as? String
-        self.avatar_image = ((post["user"])?["avatar_image"])?["url"] as? String
+        self.createdAtDate = createdAtDate
+        self.text = text
+        self.userName = userName
+        self.avatarImageURL = avatarImageURL
     }
-    
 }

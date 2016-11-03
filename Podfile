@@ -6,8 +6,9 @@ target 'TableView Demo' do
   use_frameworks!
 
   # Pods for TableView Demo
-pod ‘Alamofire’
+pod 'Alamofire'
 pod 'SVProgressHUD'
 pod 'DateTools'
 
 end
+

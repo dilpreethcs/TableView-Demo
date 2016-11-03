@@ -11,44 +11,38 @@ import SVProgressHUD
 
 class DemoTableViewController: UITableViewController {
     
-    var posts : [Post] = [Post]() {
+    var posts = [Post]() {
         didSet {
-            posts.sortInPlace({ $0.created_at > $1.created_at })
+//            posts.sortInPlace({ $0.created_at > $1.created_at })
             
             if self.isViewLoaded() {
-                self.tableView.reloadData()
+                tableView.reloadData()
             }
         }
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.title = "Posts"
+        title = "Posts"
+        tableView.rowHeight = UITableViewAutomaticDimension
+        tableView.estimatedRowHeight = 300
         
-        self.refreshControl = UIRefreshControl()
-        self.refreshControl?.addTarget(self, action: #selector(DemoTableViewController.refresh), forControlEvents: UIControlEvents.ValueChanged)
+        let refreshControl = UIRefreshControl()
+        self.refreshControl = refreshControl
+        refreshControl.addTarget(self, action: #selector(refresh), forControlEvents: .ValueChanged)
         
-        SVProgressHUD.showWithStatus("Loading Posts...")
-        getPosts()
-        self.tableView.rowHeight = UITableViewAutomaticDimension
-        self.tableView.estimatedRowHeight = 300
+        tableView.contentOffset = CGPoint(x: 0, y: tableView.contentOffset.y - refreshControl.frame.size.height)
+        refreshControl.beginRefreshing()
+//        SVProgressHUD.showWithStatus("Loading Posts...")
+        refresh()
     }
 
-    func refresh(sender:AnyObject) {
+    internal func refresh() {
         APIService.sharedInstance.getPosts { (allPosts, error) in
             if allPosts != nil {
                 self.posts = allPosts!
             }
             self.refreshControl?.endRefreshing()
-        }
-    }
-    
-    private func getPosts() {
-        APIService.sharedInstance.getPosts { (allPosts, error) in
-            if allPosts != nil {
-                self.posts = allPosts!
-            }
-            SVProgressHUD.dismiss()
         }
     }
 }

@@ -30,19 +30,21 @@ class APIService {
             do {
                 print("Request: \(request!)")
                 print("Response: \(response!)")
-                if let fetchedData = data {
-                    if let jsonData = try NSJSONSerialization.JSONObjectWithData(fetchedData, options: .AllowFragments) as? [String : AnyObject] {
-                        var posts = [Post]()
-                        if let dataDict = jsonData["data"] as? [AnyObject] {
-                            for i in 0..<(dataDict.count ?? 0) {
-                                if let individualPost = dataDict[i] as? [String : AnyObject] {
-                                    posts.append(Post(post: individualPost))
-                                }
-                            }
-                            completion(allPosts: posts, error: nil)
-                        }
+                guard let fetchedData = data else { completion(allPosts: nil, error: nil); return }
+                guard let jsonData = try NSJSONSerialization.JSONObjectWithData(fetchedData, options: .AllowFragments) as? [String : AnyObject] else { completion(allPosts: nil, error: nil); return }
+                guard let dataDict = jsonData["data"] as? [[String: AnyObject]] else { completion(allPosts: nil, error: nil); return }
+                
+                var posts = [Post]()
+                
+                for i in 0..<dataDict.count {
+                    if let post = Post(post: dataDict[i]) {
+                        posts.append(post)
+                    } else {
+                        completion(allPosts: nil, error: nil)
+                        return
                     }
                 }
+                completion(allPosts: posts, error: nil)
             } catch {
                 completion(allPosts: nil, error: error as NSError)
                 print("Error encountered.")
